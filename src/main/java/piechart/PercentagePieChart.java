@@ -3,17 +3,15 @@ package piechart;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.JComponent;
 
 
-/* for "controller" behaviour
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+// for "controller" behaviour
 import java.awt.event.MouseMotionListener;
- */
+
 
 /**
  * A PercentagePieChart acts as a MVC View of a Percentage
@@ -128,6 +126,7 @@ public class PercentagePieChart extends JComponent implements PercentageView {
 	/**
 	 * Test if a mouse event is inside the "Pin" that allows
 	 * to change the percentage
+        */
 
 	private boolean inPin(MouseEvent ev) {
 		int mouseX = ev.getX();
@@ -145,7 +144,7 @@ public class PercentagePieChart extends JComponent implements PercentageView {
 	}
 
 	/**
-	 * Converts a mouse position to a Percentage value
+	 * Converts a mouse position to a Percentage value*/
 	private float pointToPercentage(MouseEvent e) {
 		int centerX = this.getWidth() / 2;
 		int centerY = this.getHeight() / 2;
@@ -173,5 +172,4 @@ public class PercentagePieChart extends JComponent implements PercentageView {
 
 		return (float) (theta / (2 * Math.PI));
 	}
-*/
 }
