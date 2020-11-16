@@ -3,6 +3,8 @@ package piechart;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import javax.swing.JComponent;
 
 
@@ -28,16 +30,22 @@ public class PercentagePieChart extends JComponent implements PercentageView {
 	 */
 	private final PercentageModel myModel;
 
+        boolean inp = false;
 
 	public PercentagePieChart(PercentageModel model) {
 		super();
 		myModel = model;
-		/* For "controller" behaviour
+		/* For "controller" behaviour*/
 		addMouseListener(new MouseListener() {
 			public void mouseClicked(MouseEvent e) {
 			}
 
 			public void mousePressed(MouseEvent e) {
+                            if(inPin(e)){
+                                inp = true;
+                            }else{
+                                inp=false;
+                            }
 			}
 
 			public void mouseReleased(MouseEvent e) {
@@ -49,16 +57,44 @@ public class PercentagePieChart extends JComponent implements PercentageView {
 			public void mouseExited(MouseEvent e) {
 			}
 
+                    @Override
+                    public void mouseClicked(MouseEvent me) {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public void mousePressed(MouseEvent me) {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public void mouseReleased(MouseEvent me) {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public void mouseEntered(MouseEvent me) {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent me) {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+
 		});
 	        addMouseMotionListener(new MouseMotionListener() {
 			public void mouseDragged(MouseEvent e) {
+                            if(inp){
+                                myModel.setValue(pointToPercentage(e));
+                            }
 			}
 
 			public void mouseMoved(MouseEvent e) {
 			}
 
 		});
-		 */
+		 
 	}
 
 	// "View" behaviour : when the percentage changes, the piechart must be repainted
