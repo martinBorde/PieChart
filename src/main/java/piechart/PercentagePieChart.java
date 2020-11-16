@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+//import java.awt.event.MouseListener;
 import javax.swing.JComponent;
 
 
@@ -55,7 +56,7 @@ public class PercentagePieChart extends JComponent implements PercentageView {
 			public void mouseExited(MouseEvent e) {
 			}
 
-                    @Override
+                    /*@Override
                     public void mouseClicked(MouseEvent me) {
                         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                     }
@@ -78,7 +79,7 @@ public class PercentagePieChart extends JComponent implements PercentageView {
                     @Override
                     public void mouseExited(MouseEvent me) {
                         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    }
+                    }*/
 
 		});
 	        addMouseMotionListener(new MouseMotionListener() {
