@@ -1,99 +1,108 @@
 package piechart;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-//import java.awt.event.MouseListener;
 import javax.swing.JComponent;
-
-
-// for "controller" behaviour
-import java.awt.event.MouseMotionListener;
-
+import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.MouseInputListener;
 
 /**
- * A PercentagePieChart acts as a MVC View of a Percentage
- * It maintains a reference to its model in order to repaint itself.
- **/
+ * A PercentagePieChart acts boths as a MVC View and Controller of a Percentage It maintains a reference to its model in order to
+ * update it.
+ *
+ */
 public class PercentagePieChart extends JComponent implements PercentageView {
+
 	// Predefined cursors
+
 	private static final Cursor HAND = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-	private static final Cursor CROSS = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
+	private static final Cursor CROSS = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
 	private static final Cursor ARROW = Cursor.getDefaultCursor();
 
 	/**
 	 * Hold a reference to the model
 	 */
 	private final PercentageModel myModel;
-
-        boolean inp = false;
+        
+        private class AbstractState extends MouseInputAdapter {
+        };
+        
+        private AbstractState InPin = new AbstractState() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                currentState = Adjusting;
+                setCursor(CROSS);
+            }
+            
+            @Override
+            public void mouseMoved (MouseEvent e) {
+                if (!inPin(e)) {
+                        setCursor(ARROW);
+                        currentState = Init;
+                }
+            }
+            
+        };
+        
+        private AbstractState Adjusting = new AbstractState() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (inPin(e)) {
+                        currentState = InPin;
+                        setCursor(CROSS);
+                } else {
+                        currentState = Init;
+                        setCursor(ARROW);
+                }
+                repaint();
+            }
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                myModel.setValue(pointToPercentage(e));
+                repaint();
+            }
+        };
+        
+        private AbstractState Init = new AbstractState() {
+            @Override
+            public void mouseMoved (MouseEvent e) {
+                if (inPin(e)) {
+                        setCursor(HAND);
+                        currentState = InPin;
+                }
+            }
+            
+        };
+        
+        private AbstractState currentState = Init;
+        
+       
 
 	public PercentagePieChart(PercentageModel model) {
 		super();
-		myModel = model;
-		/* For "controller" behaviour*/
-		addMouseListener(new MouseListener() {
-			public void mouseClicked(MouseEvent e) {
-			}
 
+		// "Controller" behaviour : handle mouse input and update the percentage accordingly
+		MouseInputListener l = new MouseInputAdapter() {
 			public void mousePressed(MouseEvent e) {
-                            if(inPin(e)){
-                                inp = true;
-                            }else{
-                                inp=false;
-                            }
+                            currentState.mousePressed(e);
 			}
 
 			public void mouseReleased(MouseEvent e) {
+                            currentState.mouseReleased(e);
 			}
 
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			public void mouseExited(MouseEvent e) {
-			}
-
-                    /*@Override
-                    public void mouseClicked(MouseEvent me) {
-                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    }
-
-                    @Override
-                    public void mousePressed(MouseEvent me) {
-                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    }
-
-                    @Override
-                    public void mouseReleased(MouseEvent me) {
-                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    }
-
-                    @Override
-                    public void mouseEntered(MouseEvent me) {
-                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    }
-
-                    @Override
-                    public void mouseExited(MouseEvent me) {
-                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    }*/
-
-		});
-	        addMouseMotionListener(new MouseMotionListener() {
+			;
 			public void mouseDragged(MouseEvent e) {
-                            if(inp){
-                                myModel.setValue(pointToPercentage(e));
-                            }
+                            currentState.mouseDragged(e);
 			}
 
 			public void mouseMoved(MouseEvent e) {
+                            currentState.mouseMoved(e);
 			}
-
-		});
-		 
+		};
+		addMouseListener(l);
+		addMouseMotionListener(l);
+		myModel = model;
 	}
 
 	// "View" behaviour : when the percentage changes, the piechart must be repainted
@@ -101,34 +110,26 @@ public class PercentagePieChart extends JComponent implements PercentageView {
 		repaint();
 	}
 
-	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		// On calcule le centre du cercle
 		int centerX = this.getWidth() / 2;
 		int centerY = this.getHeight() / 2;
-		// On calcule le rayon du cercle
 		int radius = Math.min(getWidth() - 4, getHeight() - 4) / 2;
-		// On calcule l'angle de la part de camembert
 		double angle = myModel.getValue() * 2 * Math.PI;
-		// On trace le cercle
-		g.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
-		// On trace la part de camembert
+		g.fillOval(centerX - radius, centerY - radius, radius * 2,
+			radius * 2);
 		g.setColor(Color.yellow);
 		g.fillArc(centerX - radius, centerY - radius, radius * 2,
-			  radius * 2, 0, (int) Math.toDegrees(angle));
-		// On dessine le "bouton"
+			radius * 2, 0, (int) Math.toDegrees(angle));
 		int pinX = centerX + (int) (Math.cos(angle) * radius);
 		int pinY = centerY - (int) (Math.sin(angle) * radius);
 		g.setColor(Color.gray.brighter());
-		g.fill3DRect(pinX - 4, pinY - 4, 8, 8, true);
+		g.fill3DRect(pinX - 4, pinY - 4, 8, 8, currentState != Adjusting);
 	}
-/* for "controller" behaviour
-	/**
-	 * Test if a mouse event is inside the "Pin" that allows
-	 * to change the percentage
-        */
 
+	/**
+	 * Test if a mouse event is inside the "Pin" that allows to change the percentage
+	 */
 	private boolean inPin(MouseEvent ev) {
 		int mouseX = ev.getX();
 		int mouseY = ev.getY();
@@ -145,7 +146,8 @@ public class PercentagePieChart extends JComponent implements PercentageView {
 	}
 
 	/**
-	 * Converts a mouse position to a Percentage value*/
+	 * Converts a mouse position to a Percentage value
+	 */
 	private float pointToPercentage(MouseEvent e) {
 		int centerX = this.getWidth() / 2;
 		int centerY = this.getHeight() / 2;
@@ -163,7 +165,7 @@ public class PercentagePieChart extends JComponent implements PercentageView {
 			theta = 0;
 		}
 
-		if ( (mouseX > 0) && (mouseY < 0)) {
+		if ((mouseX > 0) && (mouseY < 0)) {
 			theta = -1 * theta;
 		} else if (mouseX < 0) {
 			theta += Math.PI;
